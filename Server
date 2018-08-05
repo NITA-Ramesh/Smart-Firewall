@@ -1,0 +1,226 @@
+#!/bin/bash
+
+#color codes
+close="\e[0m"
+green="\e[0;32m"
+cyan="\e[0;36m"
+lcyan="\e[1;36m"
+lgreen="\e[1;32m"
+lred="\e[1:31m"
+red="\e[0;31m"
+black="\e[0;30m"
+darkgrey="\e[1;30m"
+blue="\e[0;34m"
+lblue="\e[1;34m"
+purple="\e[0;35m"
+lpurple="\e[1;35m"
+brown="\e[0;33m"
+yellow="\e[1;33m"
+lgray="\e[0;37m"
+white="\e[1;37m"
+bold="\e[1m"
+italic="\e[3m"
+underline="\e[4m"
+strikethrough="\e[9m"
+blink="\e[5m"
+reverse="\e[7m"
+dim="\e[2m"
+invisible="\e[8m"
+
+
+#banner
+echo -e "${red}${bold}${blink}
+               _  __  _   _    ___     ____   _  __          _  __  _   _    ___     ____   _  __  _ _ _ 
+              | |/ / | \ | |  / _ \   / ___| | |/ /         | |/ / | \ | |  / _ \   / ___| | |/ / | | | |
+              | ' /  |  \| | | | | | | |     | ' /   _____  | ' /  |  \| | | | | | | |     | ' /  | | | |
+              | . \  | |\  | | |_| | | |___  | . \  |_____| | . \  | |\  | | |_| | | |___  | . \  |_|_|_|
+              |_|\_\ |_| \_|  \___/   \____| |_|\_\         |_|\_\ |_| \_|  \___/   \____| |_|\_\ (_|_|_)
+                                                                                                         
+${close}"
+echo
+echo
+
+
+
+#starting
+
+echo "*************************************************************************************************"
+echo -e " ${blue}${bold}${italic}${blink}It takes 20 years to build a reputation & few minutes of cyber incident to ruin it.${close}"
+echo "*************************************************************************************************"
+echo
+echo
+echo
+
+#introduction
+
+echo "&&&&&&&&&&&&&&&&&&"
+echo -e "${red}${bold}${italic}  INTRODUCTION${close}"
+echo "&&&&&&&&&&&&&&&&&&"
+echo ""
+echo -e "${bold}${italic}${underline}${reverse}PORT KNOCKING MECHANISM${close}
+
+${lgray}1.${green} Provide remote access to the authorized client to access static server using ssh(secure shell).
+${lgray}2.${green} Provide an extra basic layer of security.
+${lgray}3.${green} Default access in server in port 22 will be closed.
+${lgray}4.${green} Give access using the port knocking mechanism.${close}"
+echo ""
+echo
+echo
+
+#installing dependencies
+
+echo -e "%%%%%%%%%%%%%%%%%%%%%%%%%%"
+echo -e "${red}${bold}${italic}  CHECKING DEPENDENCIES${close}"
+echo -e "%%%%%%%%%%%%%%%%%%%%%%%%%%"
+echo
+ssh=$(dpkg -s openssh-server | grep "Status: install ok installed")
+f1=0
+f2=0
+f3=0
+if [ -n "$ssh" ]
+then
+echo -e "OPENSSH-SERVER   : ${brown}INSTALLED${close}"
+f1=1
+else
+echo -e "OPENSSH-SERVER   : ${red}NOT INSTALLED${close} "
+fi
+ipt=$(dpkg -s iptables | grep "Status: install ok installed")
+if [ -n "$ipt" ]
+then
+echo -e "IPTABLES PACKAGE : ${brown}INSTALLED${close}"
+f2=1
+else
+echo -e "IPTABLES PACKAGE : ${red}NOT INSTALLED${close}"
+fi
+kn=$(dpkg -s knockd | grep "Status: install ok installed")
+if [ -n "$kn" ]
+then
+echo -e "KNOCKD PACKAGE   : ${brown}INSTALLED${close}"
+f3=1
+else
+echo -e "KNOCKD PACKAGE   : ${red}NOT INSTALLED${close}"
+fi
+echo
+echo
+echo
+if [ $f1 == 0 ]
+then
+echo -e "${lgreen}INSTALLING OPENSSH-SERVER${close}"
+sudo apt install openssh-server
+echo
+echo
+echo
+fi
+if [ $f2 == 0 ]
+then
+echo "${lgreen}INSTALLING IPTABLES${close}"
+sudo apt install iptables
+echo
+echo
+echo
+fi
+if [ $f3 == 0 ]
+then
+echo "${lgreen}INSTALLING KNOCKD${close}"
+sudo apt install knockd
+echo
+echo
+echo
+fi
+active_interface(){
+echo -e "@@@@@@@@@@@@@@@@@@@@@@@@@"
+echo -e "${red}${bold}${italic}   ACTIVE INTERFACES ${close}"
+echo -e "@@@@@@@@@@@@@@@@@@@@@@@@@"
+echo
+echo -e "${brown}S.NO\tINTERFACE\tIP${close}"
+ip r | grep "src" | cut -d " " -f 3,9 --output-delimiter "		" | awk '{print NR "	" $0}'
+no_of_interfaces=$(ip r | grep src | cut -d " " -f 3,9 | wc -l)
+echo
+
+if [ $no_of_interfaces -eq 0 ]
+then
+echo -e "${green}No active interfaces. Try to connect to a network first${close}"
+exit
+elif [ $no_of_interfaces -eq 1 ]
+then 
+n=1
+echo -e "${green}Only one active interface found. Auto selected${close}"
+else
+echo -e "${green}select an active interface${close} > "
+read n
+fi
+
+if [[ $n -ge 1 && $n -le $no_of_interfaces ]]
+then
+	var_interface=$(ip r | grep src | cut -d " " -f 3 | awk 'NR=='$n'{print}')
+	var_interface_ip=$(ip r | grep src | cut -d " " -f 9 | awk 'NR=='$n'{print}')
+	network=$( ip r | grep src | awk 'NR=='$n'{print $1}')
+	echo -e "${lcyan}$var_interface is selected , your IP is $var_interface_ip and your network is $network${close}"
+else
+return 1
+fi
+} 
+
+until active_interface
+do
+echo -e "\n${red}WRONG INPUT. TRY AGAIN${close}\n"
+done
+echo
+echo
+echo
+
+#configuration of files
+
+echo -e "#############################"
+echo -e "${red}${bold}${italic}  CONFIGURATION OF FILES ${close}"
+echo -e "#############################"
+
+echo -e "${yellow}${bold}configuring sshd_config file${close}"
+sudo sed -i "s/#Port 22/Port 22/" /etc/ssh/sshd_config
+sudo sed -i "s/PermitRootLogin prohibit-password/PermitRootLogin yes/" /etc/ssh/sshd_config
+sudo sed -i "s/#PermitRootLogin yes/PermitRootLogin yes/" /etc/ssh/sshd_config
+sudo sed -i "s/StrictModes yes/#StrictModes yes/" /etc/ssh/sshd_config
+
+echo -e "${yellow}${bold}configuring iptables${close}"
+sudo iptables -F
+sudo iptables -A INPUT -p tcp --dport 22 -j REJECT
+var_interface=$(ip r | grep src | cut -d " " -f 3 | awk 'NR=='$n'{print}')
+
+echo -e "${yellow}${bold}Configuring default knockd file${close}"
+sudo sed -i "s/START_KNOCKD=0/START_KNOCKD=1/" /etc/default/knockd
+sudo sed -i "s/-i \([a-zA-Z0-9]*\)/-i $var_interface/" /etc/default/knockd
+sudo sed -i "s/#KNOCKD_OPTS/KNOCKD_OPTS/" /etc/default/knockd
+# sudo sed -i "3iinterface = $var_interface" /etc/knockd.conf
+echo
+echo
+echo
+sudo sed -i "s/iptables -A INPUT /iptables -I INPUT 1 /" /etc/knockd.conf
+
+#generating mechanism
+
+echo -e "^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+echo -e "${red}${bold}${italic}  KNOCK-KNOCK MECHANISM${close}"
+echo -e "^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+echo
+echo -e "${blue}${bold}${underline}knockd.conf file${close}"
+sudo cat /etc/knockd.conf
+echo -ne "${green}Do you want to make the changes in Knock-Knock mechanism? (y/n)${close} > "
+read op
+if [ $op == 'y' ]
+then
+echo -ne "Enter the first port > "
+read a
+echo -ne "Enter the second port > "
+read b
+echo -ne "Enter the third port > "
+read c
+sudo sed -i "s/sequence    = 7000,8000,9000/sequence    = $a,$b,$c/" /etc/knockd.conf
+sudo sed -i "s/sequence    = 9000,8000,7000/sequence    = $c,$b,$a/" /etc/knockd.conf
+sudo cat /etc/knockd.conf
+fi
+
+#end 
+systemctl restart ssh
+sudo service knockd start
+sudo service iptables-persistent start
+echo "hye"
