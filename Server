@@ -222,5 +222,5 @@ fi
 #end 
 systemctl restart ssh
 sudo service knockd start
-sudo service iptables-persistent start
+sudo service netfilter-persistent start
 echo "hye"
