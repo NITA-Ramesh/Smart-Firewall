@@ -223,4 +223,4 @@ fi
 systemctl restart ssh
 sudo service knockd start
 sudo service netfilter-persistent start
-echo -e "Rules of IP-Tables are Set${blue}${bold}Default port is blocked for SSH ${red}${Bold} Now try to Connect Using Client"
+echo -e "Rules of IP-Tables are Set${blue}${bold} Default port is blocked for SSH ${red}${Bold} Now try to Connect Using Client"
