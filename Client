@@ -28,7 +28,7 @@ dim="\e[2m"
 invisible="\e[8m"
 
 
-systemctl restart ssh
+sudo systemctl restart ssh
 
 echo -e "%%%%%%%%%%%%%%%%%%%%%%%%%%"
 echo -e "${red}${bold}${italic}  CHECKING DEPENDENCIES${close}"
