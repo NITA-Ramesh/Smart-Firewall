@@ -180,7 +180,7 @@ sudo sed -i "s/#Port 22/Port 22/" /etc/ssh/sshd_config
 sudo sed -i "s/PermitRootLogin prohibit-password/PermitRootLogin yes/" /etc/ssh/sshd_config
 sudo sed -i "s/#PermitRootLogin yes/PermitRootLogin yes/" /etc/ssh/sshd_config
 sudo sed -i "s/StrictModes yes/#StrictModes yes/" /etc/ssh/sshd_config
-
+sudo sed -i "s/#PasswordAuthentication yes/PasswordAuthentication yes/" /etc/ssh/sshd_config
 echo -e "${yellow}${bold}configuring iptables${close}"
 sudo iptables -F
 sudo iptables -A INPUT -p tcp --dport 22 -j REJECT
@@ -192,11 +192,11 @@ sudo sed -i "s/START_KNOCKD=\([a-zA-Z0-9]*\)/START_KNOCKD=1/" /etc/default/knock
 sudo sed -i "s/-i \([a-zA-Z0-9]*\)/-i $var_interface/" /etc/default/knockd
 sudo sed -i "s/#KNOCKD_OPTS/KNOCKD_OPTS/" /etc/default/knockd
 sudo cat /etc/default/knockd
-sudo sed -i "interface = $var_interface" /etc/knockd.conf
+#sudo sed -i "interface = $var_interface" /etc/knockd.conf
 echo
 echo
 echo
-sudo sed -i "s/iptables -A INPUT /iptables -I INPUT /" /etc/knockd.conf
+#sudo sed -i "s/iptables -A INPUT /iptables -I INPUT /" /etc/knockd.conf
 #generating mechanism
 
 echo -e "^^^^^^^^^^^^^^^^^^^^^^^^^^^"
@@ -223,5 +223,4 @@ fi
 #end 
 sudo systemctl restart ssh
 sudo service knockd start
-sudo service netfilter-persistent start
-echo -e "Rules of IP-Tables are Set${blue}${bold} Default port is blocked for SSH${yellow} ${Bold} Now try to Connect Using Client"
+echo -e "Rules of IP-Tables are Set${blue}${bold} Default port is blocked for SSH${yellow} ${Bold} Now try to Connect Using Client

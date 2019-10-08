@@ -64,6 +64,6 @@ read uname
 telnet $ip $a
 telnet $ip $b
 telnet $ip $c
-ssh $uname@$ip
-sudo -sH
+ssh uname@$ip
+
 
