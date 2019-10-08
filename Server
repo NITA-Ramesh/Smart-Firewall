@@ -223,4 +223,4 @@ fi
 #end 
 sudo systemctl restart ssh
 sudo service knockd start
-echo -e "Rules of IP-Tables are Set${blue}${bold} Default port is blocked for SSH${yellow} ${Bold} Now try to Connect Using Client
+echo -e "Rules of IP-Tables are Set${blue}${bold} Default port is blocked for SSH${yellow} ${Bold} Now try to Connect Using Client" 
